@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عيد ميلاد سعيد يا حبيبتي ❤️</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@300;400;600;700;800&family=Reem+Kufi:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #ff4d6d;
+            --primary-dark: #c9184a;
+            --secondary: #ff758f;
+            --accent: #ffb3c1;
+            --card-bg: rgba(255, 255, 255, 0.07);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        input {
+            user-select: text;
+            -webkit-user-select: text;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #0d021a 0%, #1a0826 50%, #2b0b3a 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body.locked {
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #hearts-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== Password Lock Screen ===== */
+        .lock-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 5000;
+            background: linear-gradient(135deg, #0d021a 0%, #1a0826 50%, #2b0b3a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            transition: opacity 0.7s ease, visibility 0.7s ease;
+        }
+
+        .lock-screen.hide {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .lock-box {
+            background: var(--card-bg);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 24px;
+            padding: 40px 28px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(255, 77, 109, 0.25);
+        }
+
+        .lock-box i.lock-icon {
+            font-size: 3.6rem;
+            color: var(--secondary);
+            margin-bottom: 18px;
+            display: block;
+            animation: pulse 1.6s infinite;
+        }
+
+        .lock-box h2 {
+            font-family: 'Reem Kufi', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .lock-box p {
+            color: #ddd;
+            margin-bottom: 22px;
+            line-height: 1.8;
+        }
+
+        .lock-input {
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            font-size: 1.4rem;
+            text-align: center;
+            letter-spacing: 8px;
+            outline: none;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .lock-input:focus {
+            border-color: var(--secondary);
+        }
+
+        .lock-btn {
+            margin-top: 16px;
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary), #ff8a5c);
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            font-family: 'Cairo', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 8px 22px rgba(255, 77, 109, 0.4);
+            transition: transform 0.2s ease;
+        }
+
+        .lock-btn:hover { transform: translateY(-2px); }
+        .lock-btn:active { transform: scale(0.97); }
+
+        .lock-error {
+            color: #ff8fa3;
+            margin-top: 14px;
+            min-height: 1.5em;
+            font-size: 0.95rem;
+        }
+
+        .shake {
+            animation: shake 0.45s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-10px); }
+            40% { transform: translateX(10px); }
+            60% { transform: translateX(-8px); }
+            80% { transform: translateX(8px); }
+        }
+
+        /* Audio Floating Controls */
+        .audio-control {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: rgba(255, 77, 109, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 18px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 77, 109, 0.3);
+        }
+
+        .audio-control:hover {
+            background: rgba(255, 77, 109, 0.5);
+            transform: scale(1.05);
+        }
+
+        .audio-control i {
+            font-size: 1.2rem;
+            color: var(--secondary);
+        }
+
+        .audio-control.playing i {
+            animation: pulse 1.2s infinite;
+            color: #fff;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 60px 20px 40px;
+        }
+
+        .hero-subtitle {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 1.6rem;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+
+        .hero-title {
+            font-family: 'Reem Kufi', sans-serif;
+            font-size: 3.2rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #ff758f, #ffffff, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .countdown-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 30px auto;
+            max-width: 600px;
+        }
+
+        .countdown-title {
+            font-size: 1.1rem;
+            color: var(--accent);
+            margin-bottom: 15px;
+        }
+
+        .countdown-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .count-box {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 12px 5px;
+            border: 1px solid rgba(255, 117, 143, 0.2);
+        }
+
+        .count-num {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #fff;
+            display: block;
+        }
+
+        .count-label {
+            font-size: 0.8rem;
+            color: #ccc;
+        }
+
+        .envelope-section {
+            margin: 50px 0;
+            text-align: center;
+        }
+
+        .envelope-wrapper {
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .envelope-card {
+            background: linear-gradient(145deg, #ff4d6d, #800f2f);
+            width: 300px;
+            height: 200px;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 15px 35px rgba(255, 77, 109, 0.4);
+            transition: all 0.5s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .envelope-card:hover {
+            transform: translateY(-8px) scale(1.02);
+        }
+
+        .envelope-card i.heart-icon {
+            font-size: 4rem;
+            color: #fff;
+            margin-bottom: 15px;
+            animation: pulse 1.5s infinite;
+        }
+
+        .envelope-card p {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s ease;
+            padding: 20px;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .letter-paper {
+            background: #fff;
+            color: #2b2b2b;
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 550px;
+            width: 100%;
+            position: relative;
+            transform: scale(0.7);
+            transition: transform 0.4s ease;
+            text-align: right;
+            border: 8px solid #fff5f7;
+        }
+
+        .modal.active .letter-paper {
+            transform: scale(1);
+        }
+
+        .letter-paper h2 {
+            font-family: 'Amiri', serif;
+            color: var(--primary-dark);
+            margin-bottom: 20px;
+            font-size: 2rem;
+            border-bottom: 2px dashed var(--accent);
+            padding-bottom: 10px;
+        }
+
+        .letter-paper p {
+            font-family: 'Amiri', serif;
+            font-size: 1.25rem;
+            line-height: 2;
+            color: #4a4a4a;
+            margin-bottom: 15px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: #f0f0f0;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #333;
+        }
+
+        .section-title {
+            text-align: center;
+            font-family: 'Reem Kufi', sans-serif;
+            font-size: 2rem;
+            color: #fff;
+            margin: 60px 0 30px;
+        }
+
+        .reasons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .reason-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 25px 20px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        .reason-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 77, 109, 0.15);
+        }
+
+        .reason-card i {
+            font-size: 2.2rem;
+            color: var(--secondary);
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .reason-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .reason-card p {
+            font-size: 0.95rem;
+            color: #ddd;
+            line-height: 1.6;
+        }
+
+        .wish-box {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 50px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .wish-input-wrapper {
+            display: flex;
+            gap: 10px;
+            max-width: 500px;
+            margin: 20px auto 0;
+        }
+
+        .wish-input {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            outline: none;
+        }
+
+        .wish-btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .wishes-list {
+            margin-top: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .wish-tag {
+            background: rgba(255, 117, 143, 0.2);
+            border: 1px solid var(--secondary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px 20px;
+            color: var(--accent);
+            font-size: 0.9rem;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="locked">
+
+    <!-- Password Lock Screen -->
+    <div class="lock-screen" id="lockScreen">
+        <div class="lock-box" id="lockBox">
+            <i class="fa-solid fa-lock lock-icon"></i>
+            <h2>الموقع ده مقفول 🔒</h2>
+            <p>اكتبي الباسورد عشان تفتحي المفاجأة 💖</p>
+            <input type="password" inputmode="numeric" autocomplete="off" maxlength="12" class="lock-input" id="passInput" placeholder="••••">
+            <button class="lock-btn" id="unlockBtn">فتح 💌</button>
+            <div class="lock-error" id="lockError"></div>
+        </div>
+    </div>
+
+    <!-- Canvas for Floating Hearts -->
+    <canvas id="hearts-canvas"></canvas>
+
+    <!-- Audio Element -->
+    <audio id="mySong" src="song.mp3" preload="auto" loop></audio>
+
+    <!-- Audio Player Toggle -->
+    <div class="audio-control" id="audioToggle">
+        <i class="fa-solid fa-music"></i>
+        <span id="audioText">تشغيل الموسيقى 🎵</span>
+    </div>
+
+    <div class="container">
+        
+        <section class="hero">
+            <p class="hero-subtitle">في أجمل أيام السنة...</p>
+            <h1 class="hero-title">كل سنة وأنتِ كل حياتي ❤️</h1>
+            <p style="color: #eee; font-size: 1.1rem; max-width: 600px; margin: 0 auto 20px;">
+                اليوم مش مجرد عيد ميلاد، اليوم هو العيد اللي نوّرتي فيه دنيتي بوجودك فيها.
+            </p>
+
+            <div class="countdown-container">
+                <div class="countdown-title">باقي على لحظتنا المميزة ⏳</div>
+                <div class="countdown-grid">
+                    <div class="count-box"><span class="count-num" id="days">00</span><span class="count-label">أيام</span></div>
+                    <div class="count-box"><span class="count-num" id="hours">00</span><span class="count-label">ساعات</span></div>
+                    <div class="count-box"><span class="count-num" id="minutes">00</span><span class="count-label">دقائق</span></div>
+                    <div class="count-box"><span class="count-num" id="seconds">60</span><span class="count-label">ثواني</span></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="envelope-section">
+            <div class="envelope-wrapper" id="openEnvelope">
+                <div class="envelope-card">
+                    <i class="fa-solid fa-envelope-open-text heart-icon"></i>
+                    <p>اضغطي هنا لفتح رسالتي لكِ 💌</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="modal" id="letterModal">
+            <div class="letter-paper">
+                <button class="close-modal" id="closeLetter">&times;</button>
+                <h2>إلى أميرتي ونور عيني ✨</h2>
+                <p>حبيبتي الغالية،<br>كل عام وأنتِ ألطف وأجمل ما حدث لي في هذا العالم. وجودك بجانبي يجعل الأيام العادية تبدو وكأنها أعياد.</p>
+                <p>في عيد ميلادك هذا، أتمنى لكِ سعادة تشبه جمال قلبك، وراحة بال لا تزول، وأن تبقى يدكِ في يدي طوال العمر.</p>
+                <p style="text-align: left; font-weight: bold; color: var(--primary-dark); margin-top: 20px;">بحبك دائماً وأبداً ❤️</p>
+            </div>
+        </div>
+
+        <h2 class="section-title">لماذا أنتِ كوني وبدايتي؟</h2>
+        <div class="reasons-grid">
+            <div class="reason-card">
+                <i class="fa-solid fa-face-smile-beam"></i>
+                <h3>ابتسامتكِ</h3>
+                <p>ضحكتكِ قادرة على تغيير مزاجي بالكامل وتحويل أي يوم صعب إلى يوم مليء بالبهجة.</p>
+            </div>
+            <div class="reason-card">
+                <i class="fa-solid fa-heart-pulse"></i>
+                <h3>طيبة قلبكِ</h3>
+                <p>حنيتكِ وطيبة قلبكِ بتخليني أحس إني أمتلك أنقى شخص في العالم.</p>
+            </div>
+            <div class="reason-card">
+                <i class="fa-solid fa-sparkles"></i>
+                <h3>عينيكِ الساحرتان</h3>
+                <p>كلما نظرت في عينيكِ، أرى مستقبلي وأرى المأوى والأمان الذي طالما بحثت عنه.</p>
+            </div>
+            <div class="reason-card">
+                <i class="fa-solid fa-sun"></i>
+                <h3>وجودكِ في حياتي</h3>
+                <p>لأنكِ تجعلين كل شيء أفضل، وأبسط، وأجمل بمجرد كونكِ معي.</p>
+            </div>
+        </div>
+
+        <div class="wish-box">
+            <h2 style="font-family: 'Reem Kufi', sans-serif; font-size: 1.8rem; margin-bottom: 10px;">شجرة الأمنيات 🌟</h2>
+            <p style="color: #ccc;">اكتبي أمنية جديدة لنا هذا العام لتنضم إلى شجرة أحلامنا:</p>
+            <div class="wish-input-wrapper">
+                <input type="text" id="wishInput" class="wish-input" placeholder="اكتبي أمنيتك هنا...">
+                <button class="wish-btn" id="addWishBtn">إضافة الأمنية</button>
+            </div>
+            <div class="wishes-list" id="wishesList">
+                <span class="wish-tag">سفرة مع بعض ✈️</span>
+                <span class="wish-tag">بيت يجمعنا 🏡</span>
+                <span class="wish-tag">ضحك وسعادة لا تنتهي 😄</span>
+            </div>
+        </div>
+
+        <footer>
+                تم صنع هذا الموقع بـ ❤️ خصيصاً ل اجمل شهودا في الدنيا
+        </footer>
+
+    </div>
+
+    <script>
+        // Hearts Canvas
+        const canvas = document.getElementById('hearts-canvas');
+        const ctx = canvas.getContext('2d');
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        class Heart {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * width;
+                this.y = height + Math.random() * 100;
+                this.size = Math.random() * 15 + 8;
+                this.speedY = Math.random() * 1.5 + 0.5;
+                this.speedX = Math.sin(Math.random() * Math.PI) * 0.5;
+                this.opacity = Math.random() * 0.6 + 0.2;
+                this.color = `hsla(${Math.random() * 30 + 340}, 100%, 65%, ${this.opacity})`;
+            }
+            update() {
+                this.y -= this.speedY;
+                this.x += this.speedX;
+                if (this.y < -20) this.reset();
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.beginPath();
+                ctx.fillStyle = this.color;
+                const topCurveHeight = this.size * 0.3;
+                ctx.moveTo(0, topCurveHeight);
+                ctx.bezierCurveTo(0, 0, -this.size / 2, 0, -this.size / 2, topCurveHeight);
+                ctx.bezierCurveTo(-this.size / 2, (this.size + topCurveHeight) / 2, 0, this.size, 0, this.size);
+                ctx.bezierCurveTo(0, this.size, this.size / 2, (this.size + topCurveHeight) / 2, this.size / 2, topCurveHeight);
+                ctx.bezierCurveTo(this.size / 2, 0, 0, 0, 0, topCurveHeight);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        const hearts = Array.from({ length: 45 }, () => new Heart());
+        function animateHearts() {
+            ctx.clearRect(0, 0, width, height);
+            hearts.forEach(heart => { heart.update(); heart.draw(); });
+            requestAnimationFrame(animateHearts);
+        }
+        animateHearts();
+
+        // Countdown
+        const targetDate = new Date().getTime() + (24 * 60 * 60 * 1000);
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const difference = targetDate - now;
+            if (difference > 0) {
+                document.getElementById('days').innerText = String(Math.floor(difference / (1000 * 60 * 60 * 24))).padStart(2, '0');
+                document.getElementById('hours').innerText = String(Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+                document.getElementById('minutes').innerText = String(Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+                document.getElementById('seconds').innerText = String(Math.floor((difference % (1000 * 60)) / 1000)).padStart(2, '0');
+            }
+        }
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // Modal
+        const openEnvelope = document.getElementById('openEnvelope');
+        const letterModal = document.getElementById('letterModal');
+        const closeLetter = document.getElementById('closeLetter');
+
+        openEnvelope.addEventListener('click', () => {
+            letterModal.classList.add('active');
+            confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 }, colors: ['#ff4d6d', '#ff758f', '#ffd700'] });
+        });
+
+        closeLetter.addEventListener('click', () => letterModal.classList.remove('active'));
+        letterModal.addEventListener('click', (e) => { if (e.target === letterModal) letterModal.classList.remove('active'); });
+
+        // Wishes
+        const wishInput = document.getElementById('wishInput');
+        const addWishBtn = document.getElementById('addWishBtn');
+        const wishesList = document.getElementById('wishesList');
+
+        addWishBtn.addEventListener('click', () => {
+            const text = wishInput.value.trim();
+            if (text !== "") {
+                const tag = document.createElement('span');
+                tag.className = 'wish-tag';
+                tag.innerText = text + ' ✨';
+                wishesList.appendChild(tag);
+                wishInput.value = '';
+                confetti({ particleCount: 30, spread: 50, origin: { y: 0.8 } });
+            }
+        });
+
+        // Audio Player Logic with Error Handling
+        const audioToggle = document.getElementById('audioToggle');
+        const audioText = document.getElementById('audioText');
+        const mySong = document.getElementById('mySong');
+        let isPlaying = false;
+
+        function setPlayingUI(on) {
+            isPlaying = on;
+            audioToggle.classList.toggle('playing', on);
+            audioText.innerText = on ? "إيقاف الموسيقى 🎵" : "تشغيل الموسيقى 🎵";
+        }
+
+        audioToggle.addEventListener('click', () => {
+            if (!isPlaying) {
+                mySong.play().then(() => {
+                    setPlayingUI(true);
+                }).catch(error => {
+                    alert("عذراً، لم يتم العثور على ملف الأغنية (song.mp3) في نفس المجلد، أو الصيغة غير مدعومة. تأكد من وضع ملف mp3 بنفس الاسم بجانب ملف الـ html!");
+                    console.error(error);
+                });
+            } else {
+                mySong.pause();
+                setPlayingUI(false);
+            }
+        });
+
+        // ===== Password Lock =====
+        const PASSWORD = "3010"; // غيّر الباسورد من هنا
+        const lockScreen = document.getElementById('lockScreen');
+        const lockBox = document.getElementById('lockBox');
+        const passInput = document.getElementById('passInput');
+        const unlockBtn = document.getElementById('unlockBtn');
+        const lockError = document.getElementById('lockError');
+
+        // يحوّل الأرقام العربية (٣٠١٠) إلى إنجليزية (3010)
+        function normalizeDigits(str) {
+            return str.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).trim();
+        }
+
+        function tryUnlock() {
+            if (normalizeDigits(passInput.value) === PASSWORD) {
+                lockError.textContent = "";
+                lockScreen.classList.add('hide');
+                document.body.classList.remove('locked');
+                confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ['#ff4d6d', '#ff758f', '#ffd700', '#ffffff'] });
+                // محاولة تشغيل الأغنية تلقائيًا (بدون رسالة خطأ لو الملف مش موجود)
+                mySong.play().then(() => setPlayingUI(true)).catch(() => {});
+            } else {
+                lockError.textContent = "الباسورد غلط، جرّبي تاني 💔";
+                passInput.value = "";
+                lockBox.classList.remove('shake');
+                void lockBox.offsetWidth;
+                lockBox.classList.add('shake');
+                passInput.focus();
+            }
+        }
+
+        unlockBtn.addEventListener('click', tryUnlock);
+        passInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') tryUnlock(); });
+        passInput.focus();
+    </script>
+</body>
+</html>
